@@ -12,6 +12,7 @@
 namespace Isotope\Model\Shipping;
 
 use Isotope\Interfaces\IsotopeProductCollection;
+use Isotope\Interfaces\IsotopeShipping;
 use Isotope\Isotope;
 use Isotope\Model\Shipping;
 
@@ -21,7 +22,7 @@ use Isotope\Model\Shipping;
  * @property integer $radioImageGallery The gallery to parse the image label
  * @package Isotope\Model\Attribute
  */
-class GeoShipping extends Shipping
+class GeoShipping  extends Shipping implements IsotopeShipping
 {
     private $fileData;
     const OGDB_EARTH_RADIUS = 6371;

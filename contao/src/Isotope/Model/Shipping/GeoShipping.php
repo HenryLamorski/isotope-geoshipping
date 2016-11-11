@@ -11,7 +11,11 @@
 
 namespace Isotope\Model\Shipping;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
+use Haste\Http\Response\Response;
 use Isotope\Interfaces\IsotopeProductCollection;
+use Isotope\Interfaces\IsotopeShipping;
 use Isotope\Isotope;
 use Isotope\Model\Shipping;
 
@@ -21,7 +25,7 @@ use Isotope\Model\Shipping;
  * @property integer $radioImageGallery The gallery to parse the image label
  * @package Isotope\Model\Attribute
  */
-class GeoShipping extends Shipping
+class GeoShipping  extends Shipping implements IsotopeShipping
 {
     private $fileData;
     const OGDB_EARTH_RADIUS = 6371;
@@ -162,6 +166,47 @@ class GeoShipping extends Shipping
     }
 
 
+	public function callGoogleApi()
+	{
+		$strOrigins = str_replace(","," ",Isotope::getConfig()->postal." ".Isotope::getConfig()->city);
+		$strDest    = str_replace(",","",Isotope::getCart()->getShippingAddress()->postal." ".Isotope::getCart()->getShippingAddress()->city);
+
+        $body = file_get_contents('php://input');
+        $url  = 'https://maps.googleapis.com/maps/api/distancematrix/json?origins='.$strOrigins.'&destinations='.$strDest.'&key='.$this->gs_apikey;
+
+            if (class_exists('GuzzleHttp\Client')) {
+                $request = new Client(
+                    [
+                        RequestOptions::TIMEOUT         => 5,
+                        RequestOptions::CONNECT_TIMEOUT => 5,
+                        RequestOptions::HTTP_ERRORS     => false,
+                    ]
+                );
+
+                $response = $request->get($url, [RequestOptions::BODY => $body]);
+
+                if ($response->getStatusCode() != 200) {
+                    throw new \RuntimeException($response->getReasonPhrase());
+                }
+
+				$result = json_decode($response->getBody()->getContents());
+
+				if(!isset($result->rows[0]->elements[0]->distance->value))
+					return 1;
+				else
+					return $result->rows[0]->elements[0]->distance->value/1000;
+
+            } else {
+                $request = new \RequestExtended();
+                $request->send($url, $body, 'get');
+
+				file_put_contents("/var/www/contao.log",print_r($request->response,true),FILE_APPEND);
+
+            }
+
+
+	}
+
     /**
      * @inheritdoc
      */
@@ -171,20 +216,31 @@ class GeoShipping extends Shipping
         $fromPostal = Isotope::getConfig()->postal;
         $tillPostal = Isotope::getCart()->getShippingAddress()->postal;
 
-        // find cheapest distance
-        if($this->gs_postalcodes)
-            $arrPostalcodes = explode(",", $this->gs_postalcodes);
-        if($arrPostalcodes)
-        {
-            $arrDistances=array();
-            foreach($arrPostalcodes as $postalcode)
-                $arrDistances[$postalcode] = $this->ogdbDistance(trim($postalcode),$tillPostal);
-            $distanceKM = min($arrDistances);
-        }
-        else
-        {
-            $distanceKM = $this->ogdbDistance($fromPostal,$tillPostal);
-        }
+		/**
+	 	 * calculate/retrieve distance in kilometers (km)
+	 	 */
+		if($this->gs_useGoogleDistanceMatrixApi)
+		{
+			$distanceKM  = $this->callGoogleApi();
+
+		}
+		else
+		{
+	        // find cheapest distance
+    	    if($this->gs_postalcodes)
+    	        $arrPostalcodes = explode(",", $this->gs_postalcodes);
+    	    if($arrPostalcodes)
+    	    {
+    	        $arrDistances=array();
+    	        foreach($arrPostalcodes as $postalcode)
+    	            $arrDistances[$postalcode] = $this->ogdbDistance(trim($postalcode),$tillPostal);
+    	        $distanceKM = min($arrDistances);
+    	    }
+    	    else
+    	    {
+    	        $distanceKM = $this->ogdbDistance($fromPostal,$tillPostal);
+    	    }
+		}
 
         $fltPrice = (float) $this->arrData['price'];
         $fltPrice = $distanceKM*$fltPrice;

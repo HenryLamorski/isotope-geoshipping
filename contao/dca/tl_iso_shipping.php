@@ -15,9 +15,12 @@
 $GLOBALS['TL_DCA']['tl_iso_shipping']['palettes']['geoShipping'] = str_replace
 (
 '{note_legend:hide},note;',
-'{note_legend:hide},note;{geoshipping_legend:hide},gs_minprice,gs_maxprice,gs_postalcodes;',
+'{note_legend:hide},note;{geoshipping_legend:hide},gs_minprice,gs_maxprice,gs_postalcodes,gs_useGoogleDistanceMatrixApi;',
 $GLOBALS['TL_DCA']['tl_iso_shipping']['palettes']['flat']
 );
+
+$GLOBALS['TL_DCA']['tl_iso_shipping']['palettes']['__selector__'][] = 'gs_useGoogleDistanceMatrixApi';
+$GLOBALS['TL_DCA']['tl_iso_shipping']['subpalettes']['gs_useGoogleDistanceMatrixApi'] = 'gs_apikey';
 
 
 /**
@@ -50,4 +53,20 @@ $GLOBALS['TL_DCA']['tl_iso_shipping']['fields']['gs_postalcodes'] = array
     'sql'                   => "text NULL",
 );
 
-$GLOBALS['TL_DCA']['tl_iso_shipping']['fields']['price']['label'] = &$GLOBALS['TL_LANG']['tl_iso_shipping']['price'];
+$GLOBALS['TL_DCA']['tl_iso_shipping']['fields']['gs_useGoogleDistanceMatrixApi'] = array
+(
+	'label'            => &$GLOBALS['TL_LANG']['tl_iso_shipping']['gs_useGoogleDistanceMatrixApi'],
+    'exclude'               => true,
+	'filter'                => true,
+    'inputType'             => 'checkbox',
+    'eval'                  => array('gs_useGoogleDistanceMatrixApi'=>true, 'submitOnChange' => true),
+    'sql'                   => "char(1) NOT NULL default ''",
+);
+$GLOBALS['TL_DCA']['tl_iso_shipping']['fields']['gs_apikey'] = array
+(
+	'label'            => &$GLOBALS['TL_LANG']['tl_iso_shipping']['gs_apikey'],
+    'exclude'               => true,
+    'inputType'             => 'text',
+    'eval'                  => array('tl_class'=>'clr'),
+    'sql'                   => "text NULL",
+);

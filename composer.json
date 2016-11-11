@@ -1,26 +1,21 @@
 {
-	"name": "henrylamorski/contao-isotope_geoshipping",
-	"description": "geobases shipping method for Isotope ecommerce",
-	"keywords": ["contao", "isotope", "geobases", "shipping"],
-	"type": "contao-module",
-	"license": "LGPL-3.0+",
-	"authors": [
-		{
-			"name": "Henry Lamorski",
-			"email": "henry.lamorski@mailbox.org",
-			"role": "Developer"
-		}
-	],
-	"support": {
-		"issues": "https://github.com/HenryLamorski/isotope-geoshipping/issues",
-		"source": "https://github.com/HenryLamorski/isotope-geoshipping"
-	},
-	"require": {
-		"php": ">=5.3",
-		"contao/core": ">=3.1",
-		"isotope/isotope-core": "~2.3"
-	},
-	"extra": {
+    "name":"henrylamorski/isotope-geoshipping",
+    "description":"geobased shipping modul for isotope-ecommerce",
+    "keywords":["contao", "isotope"],
+    "type":"contao-module",
+    "license":"LGPL-3.0+",
+    "authors":[
+	{
+		"name":"Henry Lamorski",
+		"email":"henry.lamorski@mailbox.org",
+		"role":"Developer"
+	}
+    ],
+    "require":{
+        "php": ">=5.3.2",
+        "contao/core-bundle": "^3.5.2 || ~4.1"
+    },
+    "extra": {
 		"contao": {
 			"sources": {
 				"contao": "system/modules/isotope-geoshipping"
@@ -28,3 +23,4 @@
 		}
 	}
 }
+
